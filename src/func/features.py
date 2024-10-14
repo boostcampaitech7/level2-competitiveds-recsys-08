@@ -1,6 +1,8 @@
+import pandas as pd
 import numpy as np
 from scipy.spatial import cKDTree
 from tqdm import tqdm
+from typing import Dict
 
 def categorize_area(x):
     range_start = (x // 50) * 50
@@ -69,3 +71,53 @@ def calculate_nearest_subway_distance(apart_coords: np.ndarray, subway_coords: n
     
     # haversine을 이용해 실제 거리 계산
     return haversine(nearest_subway_coords, apart_coords)
+
+def calculate_nearest_school_distance(apart_coords: np.ndarray, school_info: pd.DataFrame) -> Dict[str, np.ndarray]:
+    '''
+    아파트의 위도/경도 좌표와 학교 정보를 입력받아 각 학교 레벨별로 가장 가까운 학교까지의 거리를 계산하는 함수입니다.
+
+    '''
+    
+    # 학교 레벨별로 거리 계산을 위한 빈 딕셔너리 초기화
+    nearest_distances: Dict[str, np.ndarray] = {}
+
+    # 각 학교 레벨에 대한 거리 계산
+    for level in school_info['schoolLevel'].unique():
+        level_coords = school_info[school_info['schoolLevel'] == level][['latitude', 'longitude']].to_numpy()
+
+        if level_coords.shape[0] > 0:
+            tree = cKDTree(level_coords)
+            distances, indices = tree.query(apart_coords)
+
+            nearest_distances[level] = haversine(tree.data[indices], apart_coords)
+
+    return nearest_distances
+
+# 최근접 공원 거리 계산 함수
+def calculate_nearest_park_distance(apart_coords: np.ndarray, park_coords: np.ndarray) -> np.ndarray:
+    '''
+    아파트 좌표와 공원 좌표를 받아서, 각 아파트에서 가장 가까운 공원까지의 거리를 계산하는 함수입니다.
+    KDTree를 사용하여 가장 가까운 공원을 찾고, Haversine 공식을 사용해 실제 거리를 계산합니다.
+    '''
+    # 공원 좌표를 KDTree로 변환
+    tree = cKDTree(np.radians(park_coords))  
+
+    # 최근접 공원 거리 검색
+    distances, indices = tree.query(np.radians(apart_coords), k=1) 
+
+    return haversine(apart_coords, park_coords[indices])
+
+def nearest_park_area(apart_coords: np.ndarray, park_coords: np.ndarray, park_areas: np.ndarray) -> np.ndarray:
+    '''
+    아파트 좌표와 공원 좌표, 공원 면적 정보를 받아, 각 아파트에서 가장 가까운 공원의 면적을 반환하는 함수입니다.
+    KDTree를 사용하여 가장 가까운 공원을 찾고, 해당 공원의 면적을 반환합니다.
+    '''
+    
+    # 공원 좌표를 KDTree로 변환 (라디안으로 변환하여 처리)
+    tree = cKDTree(np.radians(park_coords))
+    
+    # 아파트 좌표에 대해 가장 가까운 공원의 인덱스를 검색 (라디안으로 변환하여 처리)
+    distances, indices = tree.query(np.radians(apart_coords), k=1)
+    
+    # 가장 가까운 공원의 면적을 반환
+    return park_areas[indices]
