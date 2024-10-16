@@ -3,28 +3,7 @@ import numpy as np
 from scipy.spatial import cKDTree
 from tqdm import tqdm
 from typing import Dict
-
-
-def categorize_area(x):
-    range_start = (x // 50) * 50
-    range_end = range_start + 49
-    return f"{range_start}~{range_end}"
-
-
-def categorize_date(x):
-    if 1 <= x <= 10:
-        return 10
-    elif 11 <= x <= 20:
-        return 20
-    else:
-        return 30
-
-
-def categorize_price(x):
-    scale = 10000
-    range_start = (x // scale) * scale
-    range_end = range_start + scale - 1
-    return f"{range_start}~{range_end}"
+from joblib import Parallel, delayed
 
 
 def haversine(lonlat1: np.ndarray, lonlat2: np.ndarray) -> np.ndarray:
@@ -139,3 +118,151 @@ def nearest_park_area(
 
     # 가장 가까운 공원의 면적을 반환
     return park_areas[indices]
+
+
+def haversine_vectorized(coords1, coords2):
+    """
+    2차원의 coords1와 1차원의 coords2에 대한 harversine 연산을 수행하기 위한 함수입니다.
+    """
+    R = 6371  
+    
+    coords1_rad = np.radians(coords1)
+    coords2_rad = np.radians(coords2)
+    
+    dlat = coords2_rad[:, 0] - coords1_rad[:, 0]
+    dlon = coords2_rad[:, 1] - coords1_rad[:, 1]
+    
+    a = np.sin(dlat / 2)**2 + np.cos(coords1_rad[:, 0]) * np.cos(coords2_rad[:, 0]) * np.sin(dlon / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+    
+    return R * c
+
+
+def calculate_item_density_single_with_area(apartment_coord: np.ndarray, tree, item_coords: np.ndarray, item_areas: np.ndarray, radius_km: float, zone_area:float) -> np.ndarray:
+    """
+    아파트와 주어진 대상의 밀도를 계산하는 함수입니다.
+    """
+
+    distances, indices = tree.query(apartment_coord, k=len(item_coords))
+
+    # 하버사인 연산 후
+    distances_haversine = haversine_vectorized(np.tile(apartment_coord, (len(item_coords), 1)), item_coords)
+        
+    # 특정 반경 내에 있는 아이템들의 면적 합계
+    nearby_areas = np.sum(item_areas[indices][distances_haversine <= radius_km])
+    
+    # 총면적/반경
+    return nearby_areas / zone_area
+
+
+def calculate_item_density_with_area(apartment_coords: np.ndarray, item_info: pd.DataFrame, radius_km: float, n_jobs=8) -> np.ndarray:
+    """
+    아파트와 주어진 대상의 밀도를 계산할 때 빠른 실행을 위해 병렬처리 하는 함수입니다.
+    """
+
+    item_coordinates = item_info[['latitude', 'longitude']].to_numpy()
+    item_areas = item_info['area'].to_numpy() 
+    tree = cKDTree(item_coordinates)
+    zone_area = np.pi * (radius_km ** 2)
+
+    item_densities = Parallel(n_jobs=n_jobs)(
+        delayed(calculate_item_density_single_with_area)(apartment_coord, tree, item_coordinates, item_areas, radius_km, zone_area)
+        for apartment_coord in tqdm(apartment_coords)
+    )
+    
+    return np.array(item_densities)
+
+
+def map_item_count_or_density_with_area(data: pd.DataFrame, item_info: pd.DataFrame, distance_km:float, item_name: str, n_jobs=8) -> pd.DataFrame:
+    """
+    아파트 데이터에 주어진 대상의 밀도를 매핑하는 함수입니다.
+    """
+
+    # 아파트 데이터에 유니크한 좌표를 가진 데이터를 남깁니다.
+    unique_apartment_coords = data[['latitude', 'longitude']].drop_duplicates().to_numpy()
+
+    # 유니크한 데이터에 대해 주어진 대상의 밀도를 계산합니다.
+    item_densities = calculate_item_density_with_area(unique_apartment_coords, item_info, distance_km, n_jobs=n_jobs)
+    
+    # 결과를 원래 데이터에 반영합니다.
+    result = data[['latitude', 'longitude']].drop_duplicates()
+    result[f'{item_name}_density'] = item_densities
+    data = data.merge(result, on=['latitude', 'longitude'], how='left')
+    
+    return data
+
+
+def count_schools_by_level_single(apartment_coord: np.ndarray, tree, school_coords: np.ndarray, school_levels: np.ndarray, distance_kms: list, levels:list) -> dict:
+    """
+    각 아파트에 대해 레벨별로 주어진 거리 범위 이내의 학교 수를 세는 함수입니다.
+    """
+    
+    distances, indices = tree.query(apartment_coord, k=len(school_coords))
+    
+    # 학교 레벨별로 지정해준 거리를 필터링
+    level_counts = {}
+    for i, level in enumerate(levels):
+        if level == 'elementary':
+            distance_km = distance_kms['elementary']
+        elif level == 'middle':
+            distance_km = distance_kms['middle']
+        elif level == 'high':
+            distance_km = distance_kms['high']
+        
+        # 연산량을 줄이기 위해 1차적으로 유클리드 거리로 radius_kms 이내의 거리를 가진 인덱스만 필터링
+        nearby_indices = indices[distances <= distance_km]
+        
+        # 해당 인덱스들에 대해 하버사인 거리로 다시 계산
+        nearby_school_coords = school_coords[nearby_indices]
+        distances_haversine = haversine_vectorized(np.tile(apartment_coord, (len(nearby_school_coords), 1)), nearby_school_coords)
+        
+        # 하버사인 거리로 레벨별 범위 이내에 있는 학교들 필터링
+        nearby_schools = (distances_haversine <= distance_km)
+        
+        # 학교의 레벨별로 정리
+        nearby_school_levels = school_levels[nearby_indices][nearby_schools]
+        
+        # 학교 수 세기
+        level_counts[level] = np.sum(nearby_school_levels == level) if np.sum(nearby_school_levels == level) > 0 else 0
+    
+    return level_counts
+
+
+def count_schools_by_level_within_radius(apartment_coords: np.ndarray, school_info: pd.DataFrame, distance_kms: list, n_jobs=8) -> pd.DataFrame:
+    """
+    학교 레벨 별로 특정 거리 내에 있는 학교의 개수를 세는 함수입니다.
+    추가적으로, 연산량을 줄이기 위해 병렬 처리를 사용합니다.
+    """
+    school_coordinates = school_info[['latitude', 'longitude']].to_numpy()
+    school_levels = school_info['schoolLevel'].to_numpy()
+    levels = ['elementary', 'middle', 'high']
+    
+    
+    tree = cKDTree(school_coordinates)
+    
+    school_counts = Parallel(n_jobs=n_jobs)(
+        delayed(count_schools_by_level_single)(apartment_coord, tree, school_coordinates, school_levels, distance_kms, levels)
+        for apartment_coord in tqdm(apartment_coords)
+    )
+    
+    return pd.DataFrame(school_counts)
+
+
+def map_school_level_counts(data: pd.DataFrame, school_info: np.ndarray, distance_kms: list, n_jobs=8) -> pd.DataFrame:
+    """
+    아파트 데이터에 특정 거리 이내 학교 레벨별 개수를 매핑하는 함수힙니다.
+
+    """
+    
+    unique_apartment_coords = data[['latitude', 'longitude']].drop_duplicates().to_numpy()
+
+    # 학교 레벨별 개수 계산
+    school_counts_df = count_schools_by_level_within_radius(unique_apartment_coords, school_info, distance_kms, n_jobs=n_jobs)
+    
+    result = data[['latitude', 'longitude']].drop_duplicates().reset_index(drop=True)
+    result = pd.concat([result, school_counts_df], axis=1)
+
+    # 결과를 원본 데이터에 병합
+    data = data.merge(result, on=['latitude', 'longitude'], how='left')
+    
+    return data
