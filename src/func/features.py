@@ -85,7 +85,6 @@ def calculate_nearest_school_distance(
 ) -> Dict[str, np.ndarray]:
     """
     아파트의 위도/경도 좌표와 학교 정보를 입력받아 각 학교 레벨별로 가장 가까운 학교까지의 거리를 계산하는 함수입니다.
-
     """
 
     # 학교 레벨별로 거리 계산을 위한 빈 딕셔너리 초기화
