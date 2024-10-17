@@ -3,11 +3,61 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial import cKDTree
 from tqdm import tqdm
 from typing import Dict
 from joblib import Parallel, delayed
+
+
+
+def apply_kmeans_clustering(
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    n_clusters: int = 25,
+    random_state: int = 42
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    KMeans 클러스터링을 적용하고 클러스터 라벨을 반환합니다.
+
+    이 함수는 주어진 훈련 데이터에 KMeans 클러스터링을 적용하고,
+    테스트 데이터에 대해서는 가장 가까운 훈련 데이터 포인트의 클러스터 라벨을 할당합니다.
+
+    Args:
+        X_train (pd.DataFrame): 훈련 데이터. 'latitude'와 'longitude' 열을 포함해야 합니다.
+        X_test (pd.DataFrame): 테스트 데이터. 'latitude'와 'longitude' 열을 포함해야 합니다.
+        n_clusters (int, optional): KMeans의 클러스터 수. 기본값은 25입니다.
+        random_state (int, optional): 난수 시드. 기본값은 42입니다.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: 훈련 데이터와 테스트 데이터에 대한 클러스터 라벨.
+            첫 번째 요소는 훈련 데이터의 클러스터 라벨이고,
+            두 번째 요소는 테스트 데이터의 클러스터 라벨입니다.
+    """
+    # 예외처리
+    if X_train.empty or X_test.empty:
+        raise ValueError("Input DataFrames cannot be empty")
+    if "latitude" not in X_train.columns or "longitude" not in X_train.columns:
+        raise ValueError("X_train must contain 'latitude' and 'longitude' columns")
+    if "latitude" not in X_test.columns or "longitude" not in X_test.columns:
+        raise ValueError("X_test must contain 'latitude' and 'longitude' columns")
+
+    # 스케일링 된 위치 데이터 생성
+    X_train_location, X_test_location = _get_scaled_location(X_train, X_test)
+
+    # Train 데이터에 KMeans 적용
+    kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
+    train_clusters = kmeans.fit_predict(X_train_location)
+
+    # Validation 데이터에 클러스터 라벨 할당
+    nn = NearestNeighbors(n_neighbors=1, metric="euclidean")
+    nn.fit(X_train_location)
+
+    _, indices = nn.kneighbors(X_test_location)
+    test_clusters = train_clusters[indices.flatten()]
+
+    return train_clusters, test_clusters
 
 
 def apply_dbscan_clustering(
