@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import KDTree
 from scipy.spatial import cKDTree
 from tqdm import tqdm
 from typing import Dict
@@ -489,3 +490,26 @@ def map_school_level_counts(
     data = data.merge(result, on=["latitude", "longitude"], how="left")
 
     return data
+
+def nearest_subway_is_transfer(
+    apart_coords: np.ndarray, subway_coords: np.ndarray, is_transfer_station: np.ndarray
+) -> pd.DataFrame:
+    """
+    아파트 데이터에 대해 가장 가까운 지하철역이 환승역인지 아닌지를 매핑하는 함수.
+
+    Args:
+        apart_coords (np.ndarray): 아파트 좌표 배열 (latitude, longitude)
+        subway_coords (np.ndarray): 지하철 좌표 배열 (latitude, longitude)
+        is_transfer_station (np.ndarray): 각 지하철역이 환승역인지 여부 (1: 환승역, 0: 비환승역)
+
+    Returns:
+        np.ndarray: 아파트에 대해 가장 가까운 지하철역의 환승 여부 배열 (0 또는 1)
+    """
+    # cKDTree를 사용해 가장 가까운 지하철역 찾기
+    tree = cKDTree(subway_coords)
+    distances, indices = tree.query(apart_coords, k=1, workers=-1)
+
+    # 가장 가까운 지하철역의 환승 여부 매핑
+    nearest_subway_is_transfer = is_transfer_station[indices]
+
+    return nearest_subway_is_transfer
