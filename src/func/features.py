@@ -470,7 +470,7 @@ def map_school_level_counts(
     data: pd.DataFrame, school_info: np.ndarray, distance_kms: list, n_jobs=8
 ) -> pd.DataFrame:
     """
-    아파트 데이터에 특정 거리 이내 학교 레벨별 개수를 매핑하는 함수힙니다.
+    아파트 데이터에 특정 거리 이내 학교 레벨별 개수를 매핑하는 함수입니다.
 
     """
 
