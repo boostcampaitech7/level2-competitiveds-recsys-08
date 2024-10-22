@@ -75,7 +75,7 @@ def train_lgb(X_train, y_train, lgb_params,
     train_data = lgb.Dataset(X_train, label=y_train)
     
     # wandb 초기화 및 파라미터 로깅
-    if project_name and experiment_name and entity_name and X_holdout is not None and y_holdout is not None:
+    if project_name and experiment_name and entity_name and X_holdout and y_holdout is not None:
         wandb.init(project=project_name, name=experiment_name, entity=entity_name)
         wandb.config.update(lgb_params)
         
@@ -118,7 +118,7 @@ def train_lgb(X_train, y_train, lgb_params,
 
         return lgb_model
     
-    else:
+    elif X_test and sample_submission is not None:
         lgb_model = lgb.train(
             lgb_params,
             train_data,
@@ -131,8 +131,10 @@ def train_lgb(X_train, y_train, lgb_params,
 
         return 0
     
+    return 0
+    
 
-def cross_validation_lgb_with_wandb(X_all, y_all, lgb_params, project_name, entity_name, n_splits=5, random_seed=42, X_test=None):
+def cross_validation_lgb_with_wandb(X_all, y_all, lgb_params, project_name, experiment_name, entity_name, n_splits=5, random_seed=42):
     # 5-fold 교차 검증 준비
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_seed)
 
@@ -190,7 +192,7 @@ def cross_validation_lgb_with_wandb(X_all, y_all, lgb_params, project_name, enti
         run.finish()
 
     # 최종 OOF 성능 계산 및 로깅
-    final_run = wandb.init(project=project_name, name="lgb_cv_final_results", entity=entity_name, reinit=True)
+    final_run = wandb.init(project=project_name, name=experiment_name, entity=entity_name, reinit=True)
 
     # 전체 OOF 성능 계산
     oof_mae = mean_absolute_error(oof_targets, oof_predictions)
