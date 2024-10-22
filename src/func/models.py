@@ -75,7 +75,7 @@ def train_lgb(X_train, y_train, lgb_params,
     train_data = lgb.Dataset(X_train, label=y_train)
     
     # wandb 초기화 및 파라미터 로깅
-    if project_name and experiment_name and entity_name and X_holdout and y_holdout is not None:
+    if project_name and experiment_name and entity_name and X_holdout is not None and y_holdout is not None:
         wandb.init(project=project_name, name=experiment_name, entity=entity_name)
         wandb.config.update(lgb_params)
         
@@ -118,7 +118,7 @@ def train_lgb(X_train, y_train, lgb_params,
 
         return lgb_model
     
-    elif X_test and sample_submission is not None:
+    elif X_test is not None and sample_submission is not None:
         lgb_model = lgb.train(
             lgb_params,
             train_data,
