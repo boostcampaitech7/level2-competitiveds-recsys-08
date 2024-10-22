@@ -11,8 +11,6 @@ from tqdm import tqdm
 from typing import Dict
 from joblib import Parallel, delayed
 
-
-
 def apply_kmeans_clustering(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
@@ -142,8 +140,7 @@ def _get_scaled_location(
 
     return X_train_location_scaled, X_test_location_scaled
 
-
-def haversine(lonlat1: np.ndarray, lonlat2: np.ndarray) -> np.ndarray:
+def _haversine(lonlat1: np.ndarray, lonlat2: np.ndarray) -> np.ndarray:
     """
     두 개의 위도/경도 배열을 받아서, 각 좌표 간의 거리를 계산합니다.
 
@@ -175,7 +172,7 @@ def haversine(lonlat1: np.ndarray, lonlat2: np.ndarray) -> np.ndarray:
     return distance
 
 
-def haversine_vectorized(coords1: np.ndarray, coords2: np.ndarray) -> np.ndarray:
+def _haversine_vectorized(coords1: np.ndarray, coords2: np.ndarray) -> np.ndarray:
     """
     2차원의 coords1와 1차원의 coords2에 대한 harversine 연산을 수행하기 위한 함수입니다.
     """
@@ -194,7 +191,6 @@ def haversine_vectorized(coords1: np.ndarray, coords2: np.ndarray) -> np.ndarray
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
     return R * c
-
 
 def calculate_nearest(
     apart_coords: np.ndarray, reference_coords: np.ndarray, k: int = 1
@@ -218,20 +214,24 @@ def calculate_nearest(
 
 
 def calculate_nearest_subway_distance(
-    apart_coords: np.ndarray, subway_coords: np.ndarray
+    apart_data: pd.DataFrame, subway_coords: pd.DataFrame
 ) -> np.ndarray:
     """
     각 행에 대해 가장 가까운 지하철역까지의 거리를 계산하는 함수입니다.
     calculate_nearest 함수를 통해 가장 가까운 지하철의 좌표를 받아 실제 거리를 계산한 후 반환합니다.
     """
-    distances, nearest_subway_coords = calculate_nearest(apart_coords, subway_coords)
+    apart_coords_arr = apart_data[['latitude', 'longitude']].to_numpy()
+    subway_coords_arr = subway_coords[['latitude', 'longitude']].to_numpy()
 
+    distances, nearest_subway_coords = calculate_nearest(apart_coords_arr, subway_coords_arr)
+
+    apart_data.loc[:, 'nearest_subway_distance'] = _haversine(nearest_subway_coords, apart_coords_arr)
     # haversine을 이용해 실제 거리 계산
-    return haversine(nearest_subway_coords, apart_coords)
+    return apart_data
 
 
 def calculate_nearest_school_distance(
-    apart_coords: np.ndarray, school_info: pd.DataFrame
+    apart_data: pd.DataFrame, school_info: pd.DataFrame
 ) -> Dict[str, np.ndarray]:
     """
     아파트의 위도/경도 좌표와 학교 정보를 입력받아 각 학교 레벨별로 가장 가까운 학교까지의 거리를 계산하는 함수입니다.
@@ -239,6 +239,8 @@ def calculate_nearest_school_distance(
 
     # 학교 레벨별로 거리 계산을 위한 빈 딕셔너리 초기화
     nearest_distances: Dict[str, np.ndarray] = {}
+
+    apart_coords_arr = apart_data[['latitude', 'longitude']].to_numpy()
 
     # 각 학교 레벨에 대한 거리 계산
     for level in school_info["schoolLevel"].unique():
@@ -248,47 +250,14 @@ def calculate_nearest_school_distance(
 
         if level_coords.shape[0] > 0:
             tree = cKDTree(level_coords)
-            distances, indices = tree.query(apart_coords)
+            distances, indices = tree.query(apart_coords_arr)
 
-            nearest_distances[level] = haversine(tree.data[indices], apart_coords)
+            nearest_distances[level] = _haversine(tree.data[indices], apart_coords_arr)
 
-    return nearest_distances
+    for level in nearest_distances:
+        apart_data[f'nearest_{level}_distance'] = nearest_distances[level]
 
-
-# 최근접 공원 거리 계산 함수
-def calculate_nearest_park_distance(
-    apart_coords: np.ndarray, park_coords: np.ndarray
-) -> np.ndarray:
-    """
-    아파트 좌표와 공원 좌표를 받아서, 각 아파트에서 가장 가까운 공원까지의 거리를 계산하는 함수입니다.
-    KDTree를 사용하여 가장 가까운 공원을 찾고, Haversine 공식을 사용해 실제 거리를 계산합니다.
-    """
-    # 공원 좌표를 KDTree로 변환
-    tree = cKDTree(np.radians(park_coords))
-
-    # 최근접 공원 거리 검색
-    distances, indices = tree.query(np.radians(apart_coords), k=1)
-
-    return haversine(apart_coords, park_coords[indices])
-
-
-def nearest_park_area(
-    apart_coords: np.ndarray, park_coords: np.ndarray, park_areas: np.ndarray
-) -> np.ndarray:
-    """
-    아파트 좌표와 공원 좌표, 공원 면적 정보를 받아, 각 아파트에서 가장 가까운 공원의 면적을 반환하는 함수입니다.
-    KDTree를 사용하여 가장 가까운 공원을 찾고, 해당 공원의 면적을 반환합니다.
-    """
-
-    # 공원 좌표를 KDTree로 변환 (라디안으로 변환하여 처리)
-    tree = cKDTree(np.radians(park_coords))
-
-    # 아파트 좌표에 대해 가장 가까운 공원의 인덱스를 검색 (라디안으로 변환하여 처리)
-    distances, indices = tree.query(np.radians(apart_coords), k=1)
-
-    # 가장 가까운 공원의 면적을 반환
-    return park_areas[indices]
-
+    return apart_data
 
 def calculate_item_density_single_with_area(
     apartment_coord: np.ndarray,
@@ -305,7 +274,7 @@ def calculate_item_density_single_with_area(
     distances, indices = tree.query(apartment_coord, k=len(item_coords))
 
     # 하버사인 연산 후
-    distances_haversine = haversine_vectorized(
+    distances_haversine = _haversine_vectorized(
         np.tile(apartment_coord, (len(item_coords), 1)), item_coords
     )
 
@@ -347,7 +316,7 @@ def calculate_item_density_with_area(
     return np.array(item_densities)
 
 
-def map_item_count_or_density_with_area(
+def map_item_density_with_area(
     data: pd.DataFrame,
     item_info: pd.DataFrame,
     distance_km: float,
@@ -414,7 +383,7 @@ def count_schools_by_level_single(
 
         # 해당 인덱스들에 대해 하버사인 거리로 다시 계산
         nearby_school_coords = school_coords[nearby_indices]
-        distances_haversine = haversine_vectorized(
+        distances_haversine = _haversine_vectorized(
             np.tile(apartment_coord, (len(nearby_school_coords), 1)),
             nearby_school_coords,
         )

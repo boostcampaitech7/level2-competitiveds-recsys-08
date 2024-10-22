@@ -1,5 +1,5 @@
 import wandb
-
+import numpy as np
 
 # 플롯 제목 통일을 위해 LGBM 커스텀 콜백 설정
 def lgb_wandb_callback():
@@ -18,3 +18,4 @@ def lgb_wandb_callback():
             wandb.log({log_name: value}, step=env.iteration)
 
     return callback
+
