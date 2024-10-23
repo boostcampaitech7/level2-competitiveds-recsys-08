@@ -302,7 +302,6 @@ def map_park_density(
     data: pd.DataFrame,
     item_info: pd.DataFrame,
     distance_km: float,
-    item_name: str,
     n_jobs=8,
 ) -> pd.DataFrame:
     """
@@ -321,7 +320,7 @@ def map_park_density(
 
     # 결과를 원래 데이터에 반영합니다.
     result = data[["latitude", "longitude"]].drop_duplicates()
-    result[f"{item_name}_density"] = item_densities
+    result[f"park_density"] = item_densities
     data = data.merge(result, on=["latitude", "longitude"], how="left")
 
     return data
