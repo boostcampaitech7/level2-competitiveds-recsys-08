@@ -4,10 +4,10 @@ import numpy as np
 import wandb
 
 
-import func.preprocessing as pp
-import func.features as ft
-import func.models as mdl
-from func.utils import lgb_wandb_callback
+import data.preprocessing as pp
+import data.features as ft
+import data.models as mdl
+from data.utils import lgb_wandb_callback
 
 def main():
     wandb.login()

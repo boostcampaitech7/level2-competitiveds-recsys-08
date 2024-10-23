@@ -3,7 +3,7 @@ import pandas as pd
 def load_data(path):
     return pd.read_csv(path)
 
-def preprocess_data(data):
+def remove_duplicated_data(data):
     
     processed_data = data.drop_duplicates(subset=data.columns.drop('index'), keep='first')
 

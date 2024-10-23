@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
 import wandb
-from func.utils import lgb_wandb_callback
+from ..utils import lgb_wandb_callback
 
 
 
