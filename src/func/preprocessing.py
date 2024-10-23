@@ -22,7 +22,7 @@ def split_X_y(data, target):
     - y_data (pd.DataFrame): 종속변수 df
     """
     
-    X_data = data.drop(columns=[date_column])
+    X_data = data.drop(columns=[target])
     y_data = data[target]
     
     return X_data, y_data
