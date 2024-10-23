@@ -1,0 +1,48 @@
+# 1. 공통 설정
+common:
+  data_path: "../data/"
+  random_seed: 42
+  n_splits: 5  # KFold split
+  model_save_path: "saved/models/"
+  # log_path: "../logs/" # 별도의 로그 파일 저장 X(wandb로 트래킹)
+  project_name: "house_price_project"
+
+# 2. LightGBM 하이퍼파라미터
+lightgbm:
+  objective: "regression"
+  metric: ["mae", "rmse"]
+  boosting_type: "gbdt"
+  num_leaves: 1200
+  min_samples: 20
+  learning_rate: 0.035
+  n_estimators: 2000
+  feature_fraction: 0.65
+  lambda_l1: 1.19
+  lambda_l2: 4.38
+  early_stopping_rounds: 100
+
+  # 3. CatBoost 하이퍼파라미터
+catboost:
+  depth: 10
+  learning_rate: 0.03
+  iterations: 1500  
+  loss_function: "RMSE"
+  random_strength: 2.0  
+  bagging_temperature: 1.5  
+  border_count: 128
+  logging_level: Silent
+  feature_importance_logging: True 
+
+# 4. XGBoost 하이퍼파라미터 (임시)
+xgboost:
+  objective: "reg:squarederror"
+  learning_rate: 0.05
+  max_depth: 8
+  n_estimators: 1500
+  subsample: 0.8
+  colsample_bytree: 0.8
+
+# 5. Ensemble 설정 (임시)
+ensemble:
+  voting: "soft"
+  models: ["lightgbm", "catboost", "xgboost"]
