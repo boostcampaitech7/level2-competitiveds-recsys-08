@@ -52,11 +52,11 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
         print(f"Fold {fold}")
 
         # Train/Validation 데이터셋 분리
-        X_train, X_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
-        y_train, y_val = y_train.iloc[train_idx], y_train.iloc[val_idx]
+        X_fold, X_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
+        y_fold, y_val = y_train.iloc[train_idx], y_train.iloc[val_idx]
 
         # LightGBM 데이터셋 생성
-        train_data = lgb.Dataset(X_train, label=y_train)
+        train_data = lgb.Dataset(X_fold, label=y_fold)
         val_data = lgb.Dataset(X_val, label=y_val, reference=train_data)
 
         # LightGBM 모델 학습
