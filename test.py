@@ -16,7 +16,7 @@ def load_config(path): # train.py와 중복
 def main():
 
     # config 파일 불러오기
-    config = load_config("config.yaml")
+    config = load_config("test_config.yaml")
 
     # 공통 설정
     RANDOM_SEED = config['common']['random_seed']
@@ -56,7 +56,7 @@ def main():
     submission_filename = "submission.csv"
     submission.to_csv(submission_filename, index=False)
     print(f"Submission file saved as {submission_filename}")
-    
+
 
 if __name__ == "__main__":
     main()
