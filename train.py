@@ -21,8 +21,8 @@ warnings.filterwarnings("ignore")
 import src.data.preprocessor as pre
 from src.utils import lgb_wandb_callback
 from src.models.lgbm import lgb_cv
-import pickle
-
+from src.models.save_model import save_model_to_pkl
+import sys
 
 def main():
     wandb.login()
@@ -34,17 +34,22 @@ def main():
     path = "../data/"
     data_preprocessor = pre.DataPreprocessor(path, "train")
     X_train, y_train = data_preprocessor.preprocess()
+    
 
-    # lgb 학습
-    lgb_models = lgb_cv(X_train, y_train)
-    # 피클로 저장
-    lgb_save_path = "saved/models/"
-    # Save each model using pickle
-    for i, model in enumerate(lgb_models):
-        model_filename = f"{lgb_save_path}lgb_model_fold_{i+1}.pkl"
-        with open(model_filename, "wb") as file:
-            pickle.dump(model, file)
-        print(f"Model for fold {i+1} saved to {model_filename}")
+    if sys.argv[1] == "lgb":
+        # lgb 학습
+        lgb_models = lgb_cv(X_train, y_train)
+        save_model_to_pkl(lgb_models, sys.argv[1])
+
+        return
+    
+    elif sys.argv[1] == "cat":
+        return
+    
+    else: # 모든 모델에 대한 학습 진행
+        return
 
 
-main()
+
+if __name__ == "__main__":
+    main()
