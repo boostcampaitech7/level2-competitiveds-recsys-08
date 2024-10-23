@@ -1,0 +1,12 @@
+# 1. 공통 설정
+common:
+  data_path: "../data/"  # 테스트 데이터 경로
+  random_seed: 42
+  model_load_path: "saved/models/"  # 학습된 모델 저장 경로
+  submission_save_path: "saved/submissions/"  # 제출 파일 저장 경로
+
+# 2. 테스트 관련 설정
+test:
+  use_ensemble: True  # 앙상블 사용 여부
+  ensemble_weights: [0.5, 0.3, 0.2]  # 앙상블에서 각 모델에 부여할 가중치 (옵션)
+  models: ["lightgbm", "catboost", "xgboost"]  # 사용할 모델들
