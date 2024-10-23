@@ -192,26 +192,6 @@ def _haversine_vectorized(coords1: np.ndarray, coords2: np.ndarray) -> np.ndarra
 
     return R * c
 
-def calculate_nearest(
-    apart_coords: np.ndarray, reference_coords: np.ndarray, k: int = 1
-) -> np.ndarray:
-    """
-    각 아파트 좌표에 대해 가장 가까운 k개의 참조 좌표를 찾습니다.
-
-    Args:
-        apart_coords (np.ndarray): 아파트 좌표 배열
-        reference_coords (np.ndarray): 참조 좌표 배열
-        k (int, optional): 찾을 가장 가까운 이웃의 수. 기본값은 1입니다.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray]: 거리와 해당하는 참조 좌표
-    """
-    tree = cKDTree(reference_coords)
-
-    distances, indices = tree.query(apart_coords, k=k)
-
-    return distances, tree.data[indices]
-
 
 def calculate_nearest_subway_distance(
     apart_data: pd.DataFrame, subway_coords: pd.DataFrame
@@ -222,10 +202,12 @@ def calculate_nearest_subway_distance(
     """
     apart_coords_arr = apart_data[['latitude', 'longitude']].to_numpy()
     subway_coords_arr = subway_coords[['latitude', 'longitude']].to_numpy()
+    
+    tree = cKDTree(subway_coords_arr)
 
-    distances, nearest_subway_coords = calculate_nearest(apart_coords_arr, subway_coords_arr)
+    _, indices = tree.query(apart_coords_arr)
 
-    apart_data.loc[:, 'nearest_subway_distance'] = _haversine(nearest_subway_coords, apart_coords_arr)
+    apart_data.loc[:, 'nearest_subway_distance'] = _haversine(tree.data[indices], apart_coords_arr)
     # haversine을 이용해 실제 거리 계산
     return apart_data
 
@@ -259,7 +241,7 @@ def calculate_nearest_school_distance(
 
     return apart_data
 
-def calculate_item_density_single_with_area(
+def calculate_item_density_single(
     apartment_coord: np.ndarray,
     tree,
     item_coords: np.ndarray,
@@ -285,7 +267,7 @@ def calculate_item_density_single_with_area(
     return nearby_areas / zone_area
 
 
-def calculate_item_density_with_area(
+def calculate_item_density(
     apartment_coords: np.ndarray, item_info: pd.DataFrame, radius_km: float, n_jobs=8
 ) -> np.ndarray:
     """
@@ -307,7 +289,7 @@ def calculate_item_density_with_area(
     zone_area = np.pi * (radius_km**2)
 
     item_densities = Parallel(n_jobs=n_jobs)(
-        delayed(calculate_item_density_single_with_area)(
+        delayed(calculate_item_density_single)(
             apartment_coord, tree, item_coordinates, item_areas, radius_km, zone_area
         )
         for apartment_coord in tqdm(apartment_coords)
@@ -316,7 +298,7 @@ def calculate_item_density_with_area(
     return np.array(item_densities)
 
 
-def map_item_density_with_area(
+def map_park_density(
     data: pd.DataFrame,
     item_info: pd.DataFrame,
     distance_km: float,
@@ -333,7 +315,7 @@ def map_item_density_with_area(
     )
 
     # 유니크한 데이터에 대해 주어진 대상의 밀도를 계산합니다.
-    item_densities = calculate_item_density_with_area(
+    item_densities = calculate_item_density(
         unique_apartment_coords, item_info, distance_km, n_jobs=n_jobs
     )
 

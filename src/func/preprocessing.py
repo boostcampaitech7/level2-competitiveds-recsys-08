@@ -9,13 +9,13 @@ def preprocess_data(data):
 
     return processed_data
 
-def split_X_y(data, date_column):
+def split_X_y(data, target):
     """
     데이터를 독립변수와 종속변수로 분리하는 함수.
     
     Args:
     - data (pd.DataFrame): 전체 데이터셋
-    - date_column (str): 타겟 컬럼명 (예: 'deposit')
+    - target (str): 타겟 컬럼명 (예: 'deposit')
     
     Returns:
     - X_data (pd.DataFrame): 독립변수 df
@@ -23,7 +23,7 @@ def split_X_y(data, date_column):
     """
     
     X_data = data.drop(columns=[date_column])
-    y_data = data[date_column]
+    y_data = data[target]
     
     return X_data, y_data
 
