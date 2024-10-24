@@ -4,10 +4,7 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
 import wandb
-from src.utils import lgb_wandb_callback
-
-
-# import lgb_config as config
+from src.utils import lgb_wandb_callback, load_config
 
 
 def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
@@ -21,20 +18,8 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
     # 각 폴드의 모델을 저장할 리스트
     models = []
 
-    params = {
-        "objective": "regression",
-        "metric": ["mae", "rmse"],
-        "boosting_type": "gbdt",
-        "num_leaves": 1200,
-        "min_samples": 20,
-        "learning_rate": 0.035,
-        "n_estimators": 2000,
-        "feature_fraction": 0.65,
-        "lambda_l1": 1.19,
-        "lambda_l2": 4.38,
-        "verbose": -1,
-        "random_state": 42,
-    }
+    config = load_config("configs/train_config.yaml")
+    lgb_params = config["lightgbm"]  # LightGBM 파라미터 불러오기
 
     # 5-fold 교차 검증 수행
     for fold, (train_idx, val_idx) in enumerate(kf.split(X_train), 1):
@@ -47,7 +32,7 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
         )
 
         # wandb에 파라미터 로깅
-        wandb.config.update(params)
+        wandb.config.update(lgb_params)
 
         print(f"Fold {fold}")
 
@@ -61,7 +46,7 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
 
         # LightGBM 모델 학습
         model = lgb.train(
-            params,
+            lgb_params,
             train_data,
             valid_sets=[val_data],
             valid_names="validation",
