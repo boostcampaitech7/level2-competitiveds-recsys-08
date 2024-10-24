@@ -4,7 +4,6 @@ common:
   random_seed: 42
   n_splits: 5  # KFold split
   model_save_path: "saved/models/"
-  # log_path: "../logs/" # 별도의 로그 파일 저장 X(wandb로 트래킹)
   project_name: "house_price_project"
 
 # 2. LightGBM 하이퍼파라미터
@@ -36,16 +35,7 @@ catboost:
   task_type: "GPU"
   devices: "0"
 
-# 4. XGBoost 하이퍼파라미터 (임시)
-xgboost:
-  objective: "reg:squarederror"
-  learning_rate: 0.05
-  max_depth: 8
-  n_estimators: 1500
-  subsample: 0.8
-  colsample_bytree: 0.8
-
-# 4. XGBoost 하이퍼파라미터 (임시)
+# 4. RF 하이퍼파라미터
 rf:
   n_estimators: 2000
   max_depth: 63
@@ -55,8 +45,3 @@ rf:
   n_jobs: -1
   random_state: 42
   verbose: 1
-
-# 5. Ensemble 설정 (임시)
-ensemble:
-  voting: "soft"
-  models: ["lightgbm", "catboost", "xgboost"]

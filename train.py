@@ -1,17 +1,15 @@
 import pandas as pd
 import numpy as np
 import wandb
-
-import warnings
-
-warnings.filterwarnings("ignore")
-
 import src.data.preprocessor as pre
-from src.models.lgbm import lgb_cv
+from models.lgbm import lgb_cv
 from src.models.catboost import cat_cv
 from src.models.rf import rf_cv
 from src.utils import load_config, save_model_to_pkl
 from src.arg_parser import parse_args
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 def main():
@@ -70,7 +68,7 @@ def main():
         return
 
     else:
-        print("No valid model option provided. Use -lgb, -cat, -f or -xgb.")
+        print("No valid model option provided. Use -lgb, -cat, or -rf.")
 
 
 if __name__ == "__main__":

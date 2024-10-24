@@ -25,9 +25,8 @@ def cat_cv(X_train, y_train, n_splits=5, random_seed=42):
     for fold, (train_idx, val_idx) in enumerate(kf.split(X_train), 1):
         # 각 폴드마다 새로운 wandb run 시작
         run = wandb.init(
-            project="module cat CV",
+            project="cat CV",
             name=f"cat_cv_fold_{fold}",
-            entity="recsys008-naver-boostcamp",
             reinit=True,
         )
 
@@ -71,9 +70,8 @@ def cat_cv(X_train, y_train, n_splits=5, random_seed=42):
 
     # 최종 결과를 위한 새로운 wandb run 시작
     final_run = wandb.init(
-        project="module cat CV",
+        project="cat CV",
         name="cat_cv_final_results",
-        entity="recsys008-naver-boostcamp",
         reinit=True,
     )
 
