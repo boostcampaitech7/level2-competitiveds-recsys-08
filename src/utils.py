@@ -1,6 +1,7 @@
 import wandb
 import numpy as np
 import pickle
+import yaml
 
 
 # 플롯 제목 통일을 위해 LGBM 커스텀 콜백 설정
@@ -32,9 +33,10 @@ def save_model_to_pkl(models, name):
             pickle.dump(model, file)
         print(f"Model for fold {i+1} saved to {model_filename}")
 
+
 def load_model_from_pkl(model, model_save_path):
     models = []
-    for i in range(5):  
+    for i in range(5):
         model_filename = f"{model_save_path}{model}_model_fold_{i+1}.pkl"
         with open(model_filename, "rb") as file:
             model = pickle.load(file)
@@ -42,6 +44,7 @@ def load_model_from_pkl(model, model_save_path):
             print(f"Model for fold {i+1} loaded from {model_filename}")
 
     return models
+
 
 def load_config(path):
     with open(path, "r") as file:

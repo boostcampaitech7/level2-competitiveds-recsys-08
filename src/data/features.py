@@ -11,11 +11,12 @@ from tqdm import tqdm
 from typing import Dict
 from joblib import Parallel, delayed
 
+
 def apply_kmeans_clustering(
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
     n_clusters: int = 25,
-    random_state: int = 42
+    random_state: int = 42,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     KMeans 클러스터링을 적용하고 클러스터 라벨을 반환합니다.
@@ -140,6 +141,7 @@ def _get_scaled_location(
 
     return X_train_location_scaled, X_test_location_scaled
 
+
 def _haversine(lonlat1: np.ndarray, lonlat2: np.ndarray) -> np.ndarray:
     """
     두 개의 위도/경도 배열을 받아서, 각 좌표 간의 거리를 계산합니다.
@@ -200,14 +202,16 @@ def calculate_nearest_subway_distance(
     각 행에 대해 가장 가까운 지하철역까지의 거리를 계산하는 함수입니다.
     calculate_nearest 함수를 통해 가장 가까운 지하철의 좌표를 받아 실제 거리를 계산한 후 반환합니다.
     """
-    apart_coords_arr = apart_data[['latitude', 'longitude']].to_numpy()
-    subway_coords_arr = subway_coords[['latitude', 'longitude']].to_numpy()
-    
+    apart_coords_arr = apart_data[["latitude", "longitude"]].to_numpy()
+    subway_coords_arr = subway_coords[["latitude", "longitude"]].to_numpy()
+
     tree = cKDTree(subway_coords_arr)
 
     _, indices = tree.query(apart_coords_arr)
 
-    apart_data.loc[:, 'nearest_subway_distance'] = _haversine(tree.data[indices], apart_coords_arr)
+    apart_data.loc[:, "nearest_subway_distance"] = _haversine(
+        tree.data[indices], apart_coords_arr
+    )
     # haversine을 이용해 실제 거리 계산
     return apart_data
 
@@ -222,7 +226,7 @@ def calculate_nearest_school_distance(
     # 학교 레벨별로 거리 계산을 위한 빈 딕셔너리 초기화
     nearest_distances: Dict[str, np.ndarray] = {}
 
-    apart_coords_arr = apart_data[['latitude', 'longitude']].to_numpy()
+    apart_coords_arr = apart_data[["latitude", "longitude"]].to_numpy()
 
     # 각 학교 레벨에 대한 거리 계산
     for level in school_info["schoolLevel"].unique():
@@ -237,9 +241,10 @@ def calculate_nearest_school_distance(
             nearest_distances[level] = _haversine(tree.data[indices], apart_coords_arr)
 
     for level in nearest_distances:
-        apart_data[f'nearest_{level}_distance'] = nearest_distances[level]
+        apart_data[f"nearest_{level}_distance"] = nearest_distances[level]
 
     return apart_data
+
 
 def calculate_item_density_single(
     apartment_coord: np.ndarray,
@@ -440,6 +445,7 @@ def map_school_level_counts(
     data = data.merge(result, on=["latitude", "longitude"], how="left")
 
     return data
+
 
 def nearest_subway_is_transfer(
     apart_coords: np.ndarray, subway_coords: np.ndarray, is_transfer_station: np.ndarray

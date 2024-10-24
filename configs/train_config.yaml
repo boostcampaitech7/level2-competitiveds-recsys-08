@@ -1,6 +1,6 @@
 # 1. 공통 설정
 common:
-  data_path: "../data/"
+  data_path: "../../data/"
   random_seed: 42
   n_splits: 5  # KFold split
   model_save_path: "saved/models/"
@@ -25,13 +25,13 @@ lightgbm:
 catboost:
   depth: 10
   learning_rate: 0.03
-  iterations: 1500  
+  iterations: 1500
   loss_function: "RMSE"
-  random_strength: 2.0  
-  bagging_temperature: 1.5  
+  random_strength: 2.0
+  bagging_temperature: 1.5
   border_count: 128
   logging_level: Silent
-  feature_importance_logging: True 
+  feature_importance_logging: True
 
 # 4. XGBoost 하이퍼파라미터 (임시)
 xgboost:

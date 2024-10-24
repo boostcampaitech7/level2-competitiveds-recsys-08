@@ -40,7 +40,7 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
     for fold, (train_idx, val_idx) in enumerate(kf.split(X_train), 1):
         # 각 폴드마다 새로운 wandb run 시작
         run = wandb.init(
-            project="module test",
+            project="module lgb CV",
             name=f"lgb_cv_fold_{fold}",
             entity="recsys008-naver-boostcamp",
             reinit=True,
@@ -89,7 +89,7 @@ def lgb_cv(X_train, y_train, n_splits=5, random_seed=42):
 
     # 최종 OOF 성능 계산 및 로깅
     final_run = wandb.init(
-        project="module test",
+        project="module lgb CV",
         name="final run",
         entity="recsys008-naver-boostcamp",
         reinit=True,
