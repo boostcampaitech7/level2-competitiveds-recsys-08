@@ -31,24 +31,20 @@ def main():
 
     # LightGBM 모델 불러오기
     lgb_models = load_model_from_pkl("lgb", model_save_path)
+    cat_models = load_model_from_pkl("cat", model_save_path)
+    rf_models = load_model_from_pkl("rf", model_save_path)
     lgb_predictions = vote_soft(lgb_models, X_test)
+    cat_predictions = vote_soft(cat_models, X_test)
+    rf_predictions = vote_soft(rf_models, X_test)
 
-    # catboost 모델 불러오기
-    # cat_models = load_model_from_pkl('cat', model_save_path)
-    # cat_predictions = vote_soft(cat_models, X_test)
-
-    # 위 모델들 예측 결과 가지고 소프트 보팅?
+    emsemble_predictions = (lgb_predictions + cat_predictions + rf_predictions) / 3
 
     # 제출 파일 만들기
-    submission = pd.DataFrame(
-        {
-            "Id": range(len(lgb_predictions)),  # Id 컬럼은 데이터에 맞게 수정 필요
-            "Prediction": lgb_predictions,
-        }
-    )
-    submission_filename = "submission.csv"
-    submission.to_csv(submission_filename, index=False)
-    print(f"Submission file saved as {submission_filename}")
+
+    sample_submission = pd.read_csv(path + "sample_submission.csv")
+    sample_submission["deposit"] = emsemble_predictions
+    sample_submission.to_csv("output.csv", index=False, encoding="utf-8-sig")
+    print("Submission file saved as 'output.csv'")
 
 
 if __name__ == "__main__":

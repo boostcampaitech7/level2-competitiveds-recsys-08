@@ -1,8 +1,8 @@
 # 1. 공통 설정
 common:
-  data_path: "../data/"  # 테스트 데이터 경로
+  data_path: "../../data/"  # 테스트 데이터 경로
   random_seed: 42
-  model_load_path: "saved/models/"  # 학습된 모델 저장 경로
+  model_save_path: "saved/models/"  # 학습된 모델 저장 경로
   submission_save_path: "saved/submissions/"  # 제출 파일 저장 경로
 
 # 2. 테스트 관련 설정
