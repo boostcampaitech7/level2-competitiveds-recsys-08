@@ -12,6 +12,7 @@ warnings.filterwarnings("ignore")
 
 import src.data.preprocessor as pre
 from src.models.lgbm import lgb_cv
+from src.models.catboost import cat_cv
 from src.utils import load_config, save_model_to_pkl
 from src.arg_parser import parse_args
 
@@ -48,11 +49,16 @@ def main():
         return
 
     elif args.cat:
-        # catboost 학습 (추가구현 필요)
-        cat_params = config["catboost"]  # catboost 파라미터 불러오기
-        cat_model = CatBoostRegressor(**cat_params)
-        cat_model.fit(X_train, y_train)  # catboosts에 cv 사용하려면 arg 추가
-        save_model_to_pkl(cat_model, "cat")
+        # catboost 학습
+        cat_models = cat_cv(
+            X_train,
+            y_train,
+            n_splits=config["common"]["n_splits"],
+            random_seed=RANDOM_SEED,
+        )
+        save_model_to_pkl(cat_models, "cat")
+
+        return
 
     elif args.xgb:  # XGBoost (임시)
         pass

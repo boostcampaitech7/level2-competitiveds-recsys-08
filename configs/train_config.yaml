@@ -13,25 +13,28 @@ lightgbm:
   metric: ["mae", "rmse"]
   boosting_type: "gbdt"
   num_leaves: 1200
-  min_samples: 20
   learning_rate: 0.035
   n_estimators: 2000
   feature_fraction: 0.65
   lambda_l1: 1.19
   lambda_l2: 4.38
+  random_state: 42
   early_stopping_rounds: 100
 
   # 3. CatBoost 하이퍼파라미터
 catboost:
-  depth: 10
-  learning_rate: 0.03
-  iterations: 1500
+  iterations: 7000
+  learning_rate: 0.075
   loss_function: "RMSE"
-  random_strength: 2.0
-  bagging_temperature: 1.5
-  border_count: 128
-  logging_level: Silent
-  feature_importance_logging: True
+  depth: 10
+  border_count: 200
+  random_strength: 3
+  l2_leaf_reg: 2
+  bagging_temperature: 0
+  verbose: 1000
+  random_seed: 42
+  task_type: "GPU"
+  devices: "0"
 
 # 4. XGBoost 하이퍼파라미터 (임시)
 xgboost:
