@@ -1,9 +1,5 @@
-import sys
 import pandas as pd
 import numpy as np
-
-import lightgbm as lgb
-from catboost import CatBoostRegressor, Pool
 import wandb
 
 import warnings
@@ -13,6 +9,7 @@ warnings.filterwarnings("ignore")
 import src.data.preprocessor as pre
 from src.models.lgbm import lgb_cv
 from src.models.catboost import cat_cv
+from src.models.rf import rf_cv
 from src.utils import load_config, save_model_to_pkl
 from src.arg_parser import parse_args
 
@@ -60,11 +57,20 @@ def main():
 
         return
 
-    elif args.xgb:  # XGBoost (임시)
-        pass
+    elif args.rf:
+        # random forest 학습
+        rf_models = rf_cv(
+            X_train,
+            y_train,
+            n_splits=config["common"]["n_splits"],
+            random_seed=RANDOM_SEED,
+        )
+        save_model_to_pkl(rf_models, "rf")
+
+        return
 
     else:
-        print("No valid model option provided. Use -lgb, -cat, or -xgb.")
+        print("No valid model option provided. Use -lgb, -cat, -f or -xgb.")
 
 
 if __name__ == "__main__":
