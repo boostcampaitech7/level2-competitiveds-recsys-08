@@ -10,11 +10,6 @@ import src.data.preprocessor as pre
 from src.models.ensemble import vote_soft
 from src.utils import *
 
-def load_config(path): # train.py와 중복
-    with open(path, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-
 def main():
 
     # config 파일 불러오기

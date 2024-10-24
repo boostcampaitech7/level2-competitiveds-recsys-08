@@ -42,3 +42,8 @@ def load_model_from_pkl(model, model_save_path):
             print(f"Model for fold {i+1} loaded from {model_filename}")
 
     return models
+
+def load_config(path):
+    with open(path, "r") as file:
+        config = yaml.safe_load(file)
+    return config

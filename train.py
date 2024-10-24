@@ -19,13 +19,8 @@ warnings.filterwarnings("ignore")
 import src.data.preprocessor as pre
 from src.models.lgbm import lgb_cv
 from src.models.save_model import save_model_to_pkl
-from src.utils import lgb_wandb_callback
+from src.utils import lgb_wandb_callback, load_config
 
-def load_config(path):
-    with open(path, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-    
 def main():
     wandb.login()
 
@@ -47,7 +42,7 @@ def main():
         # lgb 학습
         lgb_params = config['lightgbm']  # LightGBM 파라미터 불러오기
         lgb_models = lgb_cv(X_train, y_train)
-        lgb_models = lgb_cv(X_train, y_train, n_splits=config['common']['n_splits'], random_seed=RANDOM_SEED)
+        lgb_models = lgb_cv(X_train, y_train, params = lgb_params, n_splits=config['common']['n_splits'], random_seed=RANDOM_SEED)
         save_model_to_pkl(lgb_models, sys.argv[1])
 
         return
