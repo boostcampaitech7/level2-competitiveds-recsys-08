@@ -13,7 +13,8 @@ class DataPreprocessor:
         self.subway = pd.read_csv(path + "subwayInfo.csv")
 
     def remove_duplicates(self):
-        self.train_data = pp.remove_duplicated_data(self.train_data)
+        self.train_data = self.train_data.drop_duplicates(
+            subset=self.train_data.columns.drop('index'), keep='first')
 
     def add_nearest_subway_distance(self):
         self.train_data = ft.calculate_nearest_subway_distance(self.train_data, self.subway)
@@ -65,7 +66,7 @@ class DataPreprocessor:
         ]
 
         if self.dataset == 'train':
-            X_train, y_train = self.split_X_y("deposit")
+            X_train, y_train = self.data.drop(columns=["deposit"]), self.data["deposit"]
             X_train = self.select_features(train_columns)
             return X_train, y_train
         
