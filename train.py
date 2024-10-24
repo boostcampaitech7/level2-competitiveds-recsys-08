@@ -13,9 +13,6 @@ import wandb
 from wandb.integration.lightgbm import log_summary
 from wandb.integration.catboost import WandbCallback
 
-import optuna
-optuna.logging.set_verbosity(optuna.logging.INFO)  # optuna log 설정
-
 import warnings
 warnings.filterwarnings("ignore")
 

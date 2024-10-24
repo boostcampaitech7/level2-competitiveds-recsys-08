@@ -7,6 +7,8 @@ import lightgbm as lgb
 from catboost import CatBoostRegressor, Pool
 
 import src.data.preprocessor as pre
+from src.models.ensemble import vote_soft
+from src.utils import *
 
 def load_config(path): # train.py와 중복
     with open(path, "r") as file:
@@ -32,21 +34,15 @@ def main():
     model_save_path = config['common']['model_save_path']
     
     # LightGBM 모델 불러오기
-    lgb_models = []
-    for i in range(5):  # kfold 5개 모델 불러오기
-        model_filename = f"{model_save_path}lgb_model_fold_{i+1}.pkl"
-        with open(model_filename, "rb") as file:
-            model = pickle.load(file)
-            lgb_models.append(model)
-            print(f"Model for fold {i+1} loaded from {model_filename}")
+    lgb_models = load_model_from_pkl('lgb', model_save_path)
+    lgb_predictions = vote_soft(lgb_models, X_test)
 
-    # 예측 진행 (LightGBM 앙상블 예시)
-    lgb_predictions = np.zeros(X_test.shape[0])  # 예측 결과 저장할 배열
-    for model in lgb_models:
-        lgb_predictions += model.predict(X_test) / len(lgb_models)  # 앙상블 평균 예측
+    # catboost 모델 불러오기
+    # cat_models = load_model_from_pkl('cat', model_save_path)
+    # cat_predictions = vote_soft(cat_models, X_test)
 
-    # 최종 예측 출력
-    print("Final LightGBM predictions (ensemble):", lgb_predictions)
+    # 위 모델들 예측 결과 가지고 소프트 보팅?
+
 
     # 제출 파일 만들기
     submission = pd.DataFrame({
