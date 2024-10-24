@@ -27,9 +27,6 @@ class DataPreprocessor:
     def add_school_level_counts(self, distance_kms):
         self.train_data = ft.map_school_level_counts(self.train_data, self.school, distance_kms, n_jobs=8)
 
-    def split_X_y(self, target_column):
-        return pp.split_X_y(self.train_data, target_column)
-
     def select_features(self, train_columns):
         return self.train_data[train_columns]
 
