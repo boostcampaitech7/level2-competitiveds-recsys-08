@@ -1,6 +1,5 @@
 import pandas as pd
 
-import src.data.preprocessing as pp
 import src.data.features as ft
 
 class DataPreprocessor:
