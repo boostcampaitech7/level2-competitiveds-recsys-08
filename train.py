@@ -33,7 +33,7 @@ def main():
     wandb.login()
 
     # config.yaml 로드
-    config = load_config("train_config.yaml")
+    config = load_config("configs/train_config.yaml")
     print(f"Project Name: {config['common']['project_name']}")
 
     # 랜덤시드 고정

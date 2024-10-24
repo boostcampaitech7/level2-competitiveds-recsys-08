@@ -16,7 +16,7 @@ def load_config(path): # train.py와 중복
 def main():
 
     # config 파일 불러오기
-    config = load_config("test_config.yaml")
+    config = load_config("configs/test_config.yaml")
 
     # 공통 설정
     RANDOM_SEED = config['common']['random_seed']
