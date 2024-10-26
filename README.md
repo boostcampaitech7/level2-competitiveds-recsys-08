@@ -23,8 +23,6 @@
 
 <br>
 
-<br>
-
 ## 🛠️ 기술 스택 및 협업
   <img src="https://img.shields.io/badge/Python-3776AB?style=square&logo=Python&logoColor=white"/>&nbsp;
   
@@ -43,6 +41,13 @@
 <img width="955" alt="스크린샷 2024-10-26 20 16 02" src="https://github.com/user-attachments/assets/98f392ee-7aa0-4669-aa6a-eda0055820b5">
 <img width="961" alt="스크린샷 2024-10-26 20 20 02" src="https://github.com/user-attachments/assets/83fe5143-1ac7-43ea-86f4-7b8859361104">
 <img width="944" alt="스크린샷 2024-10-26 20 20 44" src="https://github.com/user-attachments/assets/278052a9-6314-4995-b0c6-0ab35a55ef93">
+
+<br>
+
+## Pileline
+<img width="914" alt="스크린샷 2024-10-26 20 36 00" src="https://github.com/user-attachments/assets/7413a04e-f8f1-4b3d-a54e-48c9650e4d86">
+
+<br>
 
 ## 📁 Directory
 ```bash
@@ -78,10 +83,6 @@ project/
 
 
 ```
-
-## Pileline
-<img width="1298" alt="image" src="https://github.com/user-attachments/assets/57140770-c72c-4d51-89c6-05186c1cc81c">
-
 
 ## 🏃 How to run
 
