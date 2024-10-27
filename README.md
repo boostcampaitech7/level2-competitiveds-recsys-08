@@ -44,7 +44,7 @@
 
 <br>
 
-## Pileline
+## Pipeline
 <img width="914" alt="스크린샷 2024-10-26 20 36 00" src="https://github.com/user-attachments/assets/7413a04e-f8f1-4b3d-a54e-48c9650e4d86">
 
 <br>
@@ -65,7 +65,7 @@ project/
 │          ├── preprocessor.py      
 │          ├── features.py       
 │    ├── models/          
-│          ├── __init__.py       
+│       ├── __init__.py       
 │       ├── ensemble.py     
 │       ├── lgbm.py     # LGBM 모델
 │       ├── xgb.py      # XGBoost 모델
