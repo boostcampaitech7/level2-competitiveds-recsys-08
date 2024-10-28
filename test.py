@@ -5,6 +5,7 @@ import yaml
 
 import lightgbm as lgb
 from catboost import CatBoostRegressor, Pool
+from sklearn.ensemble import RandomForestRegressor
 
 import src.data.preprocessor as pp
 from src.models.ensemble import vote_soft
@@ -14,7 +15,7 @@ from src.utils import load_model_from_pkl, load_config
 def main():
 
     # config 파일 불러오기
-    config = load_config("configs/test_config.yaml")
+    config = load_config("configs/train_config.yaml")
 
     # 공통 설정
     RANDOM_SEED = config["common"]["random_seed"]

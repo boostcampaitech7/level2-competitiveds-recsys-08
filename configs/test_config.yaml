@@ -1,5 +1,0 @@
-# 1. 공통 설정
-common:
-  data_path: "../../data/"  # 테스트 데이터 경로
-  random_seed: 42
-  model_save_path: "saved/models/"  # 학습된 모델 저장 경로
