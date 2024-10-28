@@ -13,6 +13,7 @@ To enable wandb, uncomment the wandb-related code sections and install wandb:
     pip install wandb
 """
 
+
 def cat_cv(X_train, y_train, n_splits=5, random_seed=42):
     # 5-fold 교차 검증 준비
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_seed)
