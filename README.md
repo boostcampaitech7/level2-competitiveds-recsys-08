@@ -1,7 +1,7 @@
 <p align="center">
 
   <h1> 💡 수도권 아파트 전세가 예측 프로젝트 </h1>
-  
+
   > 이 프로젝트는 주어진 데이터를 바탕으로 전세가를 예측하는 AI 알고리즘을 개발하기 위한 프로젝트입니다.
   이를 통해 한국의 전세 시장의 구조와 동향을 이해하고, 인프라와 경제적 요인에 대한 통찰을 기대합니다.
 
@@ -25,13 +25,13 @@
 
 ## 🛠️ 기술 스택 및 협업
   <img src="https://img.shields.io/badge/Python-3776AB?style=square&logo=Python&logoColor=white"/>&nbsp;
-  
+
   <img src="https://img.shields.io/badge/scikitlearn-F7931E?style=square&logo=scikitlearn&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=PyTorch&logoColor=white"/>&nbsp;
-  
+
   <img src="https://img.shields.io/badge/Optuna-3863A0?style=square&logo=Optuna&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/Pandas-150458?style=square&logo=Pandas&logoColor=white"/>&nbsp;
-  
+
   <img src="https://img.shields.io/badge/Notion-000000?style=square&logo=Notion&logoColor=white"/>&nbsp;
   <img src="https://img.shields.io/badge/weightsandbiases-FFBE00?style=square&logo=weightsandbiases&logoColor=white"/>&nbsp;
 

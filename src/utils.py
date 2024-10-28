@@ -13,6 +13,7 @@ def lgb_wandb_callback() -> Callable:
     Returns:
         Callable: LightGBM 콜백 함수
     """
+
     def callback(env: Any) -> None:
         for data_name, metric_name, value, _ in env.evaluation_result_list:
             # 메트릭 이름 변경
@@ -30,7 +31,9 @@ def lgb_wandb_callback() -> Callable:
     return callback
 
 
-def save_model_to_pkl(models: List[Booster], name: str, model_save_path: str = 'saved/models/') -> None:
+def save_model_to_pkl(
+    models: List[Booster], name: str, model_save_path: str = "saved/models/"
+) -> None:
     """
     LightGBM 모델들을 pickle 형식으로 저장합니다.
 
