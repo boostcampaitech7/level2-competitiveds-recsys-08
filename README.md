@@ -82,8 +82,43 @@ project/
 ```
 <br>
 
-## 🏃 How to run
+# 🏃 How to run
+## 요구사항 Requirements
+이 프로젝트를 실행하기 위해 필요한 모든 라이브러리를 설치하려면 다음 명령어를 실행하세요:
+```bash
+pip install -r requirements.txt
+```
+## 설정 Configuration
+이 프로젝트는 `configs/` 디렉토리 내의 YAML 파일로 모델 하이퍼 파라미터와 기타 설정을 관리합니다.
+### 파일 구조
 
+설정 파일(`config.yaml`)은 다음과 같은 주요 섹션으로 구성되어 있습니다:
+
+1. 공통 설정 (common)
+2. LightGBM 설정 (lightgbm)
+3. CatBoost 설정 (catboost)
+4. Random Forest 설정 (rf)
+
+각 섹션에는 해당 모델 또는 전체 프로젝트에 필요한 다양한 매개변수가 포함되어 있습니다.
+
+### 예시
+
+설정 파일의 일부 예시:
+
+```yaml
+common:
+  data_path: "../../data/"
+  random_seed: 42
+  n_splits: 5  # KFold split
+
+lightgbm:
+  objective: "regression"
+  metric: ["mae", "rmse"]
+  num_leaves: 1200
+  learning_rate: 0.035
+  # ...
+```
+## 학습 및 예측
 ### Training
 
 개별 모델을 훈련하려면 다음 명령어를 사용하세요:
@@ -92,6 +127,8 @@ project/
 python train.py -lgb
 python train.py -cat
 python train.py -rf
+# 또는 여러 모델을 한번에 학습시킬 수도 있습니다
+python tarin.py -lgb -cat -rf
 ```
 
 ### Testing
