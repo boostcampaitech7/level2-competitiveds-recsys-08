@@ -1,0 +1,47 @@
+# 1. 공통 설정
+common:
+  data_path: "../../data/"
+  random_seed: 42
+  n_splits: 5  # KFold split
+  model_save_path: "saved/models/"
+  project_name: "house_price_project"
+
+# 2. LightGBM 하이퍼파라미터
+lightgbm:
+  objective: "regression"
+  metric: ["mae", "rmse"]
+  boosting_type: "gbdt"
+  num_leaves: 1200
+  learning_rate: 0.035
+  n_estimators: 2000
+  feature_fraction: 0.65
+  lambda_l1: 1.19
+  lambda_l2: 4.38
+  random_state: 42
+  early_stopping_rounds: 100
+
+  # 3. CatBoost 하이퍼파라미터
+catboost:
+  iterations: 7000
+  learning_rate: 0.075
+  loss_function: "RMSE"
+  depth: 10
+  border_count: 200
+  random_strength: 3
+  l2_leaf_reg: 2
+  bagging_temperature: 0
+  verbose: 1000
+  random_seed: 42
+  task_type: "GPU"
+  devices: "0"
+
+# 4. RF 하이퍼파라미터
+rf:
+  n_estimators: 2000
+  max_depth: 63
+  min_samples_split: 10
+  min_samples_leaf: 13
+  max_features: "log2"
+  n_jobs: -1
+  random_state: 42
+  verbose: 1
